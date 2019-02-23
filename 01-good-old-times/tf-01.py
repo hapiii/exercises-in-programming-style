@@ -30,7 +30,7 @@ data = []
 # - identify words, increment corresponding counts in file
 
 # Load the list of stop words
-f = open('../stop_words.txt')
+f = open('../stop_words.txt')# 将停止词存入主存中，大约500个字符(第30～33行)
 data = [f.read(1024).split(',')] # data[0] holds the stop words
 f.close()
 
@@ -45,7 +45,7 @@ data.append(0)     # data[7] is frequency
 # Open the secondary memory
 word_freqs = touchopen('word_freqs', 'rb+')
 # Open the input file
-f = open(sys.argv[1], 'r')
+f = open(sys.argv[1], 'r')# 将输入文件一行行读入，每行最多80哥字符（第47～92行）
 # Loop over input file's lines
 while True:
     data[1] = [f.readline()] 
@@ -54,7 +54,7 @@ while True:
     if data[1][0][len(data[1][0])-1] != '\n': # If it does not end with \n
         data[1][0] = data[1][0] + '\n' # Add \n
     data[2] = None
-    data[3] = 0 
+    data[3] = 0 # 对于每一行（第57～92行）去除多余的字符，识别单词并统一转化成小写
     # Loop over characters in the line
     for c in data[1][0]: # elimination of symbol c is exercise
         if data[2] == None:
@@ -67,7 +67,7 @@ while True:
                 data[4] = False 
                 data[5] = data[1][0][data[2]:data[3]].lower()
                 # Ignore words with len < 2, and stop words
-                if len(data[5]) >= 2 and data[5] not in data[0]:
+                if len(data[5]) >= 2 and data[5] not in data[0]: # 从辅存中检索相应单词，并将词频写入辅存（70～80）
                     # Let's see if it already exists
                     while True:
                         data[6] = str(word_freqs.readline().strip(), 'utf-8')
@@ -99,19 +99,19 @@ word_freqs.flush()
 # We don't need anything from the previous values in memory
 del data[:]
 
-# Let's use the first 25 entries for the top 25 words
+# Let's use the first 25 entries for the top 25 words 在主存中保留一个最常出现的25个单词的有序列表
 data = data + [[]]*(25 - len(data))
 data.append('') # data[25] is word,freq from file
 data.append(0)  # data[26] is freq
 
-# Loop over secondary memory file
+# Loop over secondary memory file 105～117 每次从文件中读入一行，每行包括单词及其出现的频数
 while True:
     data[25] = str(word_freqs.readline().strip(), 'utf-8')
     if data[25] == '': # EOF
         break
     data[26] = int(data[25].split(',')[1]) # Read it as integer
     data[25] = data[25].split(',')[0].strip() # word
-    # Check if this word has more counts than the ones in memory
+    # Check if this word has more counts than the ones in memory 若新单词的出现次数较当前有序列表的某一单词多，将其擦入至合适位置并保存，同时去除列表末尾的单词
     for i in range(25): # elimination of symbol i is exercise
         if data[i] == [] or data[i][1] < data[26]:
             data.insert(i, [data[25], data[26]]) 
@@ -121,5 +121,5 @@ while True:
 for tf in data[0:25]: # elimination of symbol tf is exercise
     if len(tf) == 2:
         print(tf[0], ' - ', tf[1])
-# We're done
+# We're done 输出前25个单词及其频数，关闭零时文件
 word_freqs.close()
